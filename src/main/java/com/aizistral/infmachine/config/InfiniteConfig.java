@@ -3,17 +3,25 @@ package com.aizistral.infmachine.config;
 import java.io.IOException;
 import java.nio.file.Paths;
 
+import com.aizistral.infmachine.InfiniteMachine;
 import com.aizistral.infmachine.data.BelieverMethod;
 
 import com.aizistral.infmachine.utils.StandardLogger;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import lombok.NonNull;
+import net.dv8tion.jda.api.JDA;
+import net.dv8tion.jda.api.entities.Guild;
+import net.dv8tion.jda.api.entities.Role;
+import net.dv8tion.jda.api.entities.User;
+import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
 
 public class InfiniteConfig extends JsonHandler<InfiniteConfig.Data> {
     protected static final StandardLogger LOGGER = new StandardLogger("InfiniteConfig");
 
     public static final InfiniteConfig INSTANCE = new InfiniteConfig();
+
+    private JDA jda;
 
     private String accessToken;
 
@@ -25,19 +33,19 @@ public class InfiniteConfig extends JsonHandler<InfiniteConfig.Data> {
     private long requiredRatingForBeliever;
     private BelieverMethod believerMethod;
 
-    private long domainID;
-    private long templeChannelID;
-    private long councilChannelID;
-    private long machineChannelID;
-    private long suggestionsChannelID;
+    private Guild domain;
+    private TextChannel templeChannel;
+    private TextChannel councilChannel;
+    private TextChannel machineChannel;
+    private TextChannel suggestionsChannel;
 
-    private long architectRoleID;
-    private long petmasterRoleID;
-    private long guardiansRoleID;
-    private long believersRoleID;
-    private long beholdersRoleID;
-    private long dwellersRoleID;
-    private long architectID;
+    private Role architectRole;
+    private Role petmasterRole;
+    private Role guardiansRole;
+    private Role believersRole;
+    private Role beholdersRole;
+    private Role dwellersRole;
+    private User architect;
 
     private long upvoteEmojiID;
     private long downvoteEmojiID;
@@ -54,6 +62,7 @@ public class InfiniteConfig extends JsonHandler<InfiniteConfig.Data> {
     }
     @Override
     public void init() {
+        this.jda = InfiniteMachine.INSTANCE.getJDA();
         this.accessToken = fetchAccessToken();
 
         this.votingCheckDelay = fetchVotingCheckDelay();
@@ -64,19 +73,20 @@ public class InfiniteConfig extends JsonHandler<InfiniteConfig.Data> {
         this.requiredRatingForBeliever = fetchRequiredRatingForBeliever();
         this.believerMethod = fetchBelieverMethod();
 
-        this.domainID = fetchDomainID();
-        this.templeChannelID = fetchTempleChannelID();
-        this.councilChannelID = fetchCouncilChannelID();
-        this.machineChannelID = fetchMachineChannelID();
-        this.suggestionsChannelID = fetchSuggestionsChannelID();
+        this.domain = jda.getGuildById(fetchDomainID());
+        assert domain != null;
+        this.templeChannel = domain.getTextChannelById(fetchTempleChannelID());
+        this.councilChannel = domain.getTextChannelById(fetchCouncilChannelID());
+        this.machineChannel = domain.getTextChannelById(fetchMachineChannelID());
+        this.suggestionsChannel = domain.getTextChannelById(fetchSuggestionsChannelID());
 
-        this.architectRoleID = fetchArchitectRoleID();
-        this.petmasterRoleID = fetchPetmasterRoleID();
-        this.guardiansRoleID = fetchGuardiansRoleID();
-        this.believersRoleID = fetchBelieversRoleID();
-        this.beholdersRoleID = fetchBeholdersRoleID();
-        this.dwellersRoleID = fetchDwellersRoleID();
-        this.architectID = fetchArchitectID();
+        this.architectRole = domain.getRoleById(fetchArchitectRoleID());
+        this.petmasterRole = domain.getRoleById(fetchPetmasterRoleID());
+        this.guardiansRole = domain.getRoleById(fetchGuardiansRoleID());
+        this.believersRole = domain.getRoleById(fetchBelieversRoleID());
+        this.beholdersRole = domain.getRoleById(fetchBeholdersRoleID());
+        this.dwellersRole = domain.getRoleById(fetchDwellersRoleID());
+        this.architect = jda.retrieveUserById(fetchArchitectID()).complete();
 
         this.upvoteEmojiID = fetchUpvoteEmojiID();
         this.downvoteEmojiID = fetchDownvoteEmojiID();
@@ -111,52 +121,52 @@ public class InfiniteConfig extends JsonHandler<InfiniteConfig.Data> {
         return believerMethod;
     }
 
-    public long getDomainID() {
-        return domainID;
+    public Guild getDomain() {
+        return domain;
     }
 
-    public long getTempleChannelID() {
-        return templeChannelID;
+    public TextChannel getTempleChannel() {
+        return templeChannel;
     }
 
-    public long getCouncilChannelID() {
-        return councilChannelID;
+    public TextChannel getCouncilChannel() {
+        return councilChannel;
     }
 
-    public long getMachineChannelID() {
-        return machineChannelID;
+    public TextChannel getMachineChannel() {
+        return machineChannel;
     }
 
-    public long getSuggestionsChannelID() {
-        return suggestionsChannelID;
+    public TextChannel getSuggestionsChannel() {
+        return suggestionsChannel;
     }
 
-    public long getArchitectRoleID() {
-        return architectRoleID;
+    public Role getArchitectRole() {
+        return architectRole;
     }
 
-    public long getPetmasterRoleID() {
-        return petmasterRoleID;
+    public Role getPetmasterRole() {
+        return petmasterRole;
     }
 
-    public long getGuardiansRoleID() {
-        return guardiansRoleID;
+    public Role getGuardiansRole() {
+        return guardiansRole;
     }
 
-    public long getBelieversRoleID() {
-        return believersRoleID;
+    public Role getBelieversRole() {
+        return believersRole;
     }
 
-    public long getBeholdersRoleID() {
-        return beholdersRoleID;
+    public Role getBeholdersRole() {
+        return beholdersRole;
     }
 
-    public long getDwellersRoleID() {
-        return dwellersRoleID;
+    public Role getDwellersRole() {
+        return dwellersRole;
     }
 
-    public long getArchitectID() {
-        return architectID;
+    public User getArchitect() {
+        return architect;
     }
 
     public long getUpvoteEmojiID() {
@@ -380,7 +390,7 @@ public class InfiniteConfig extends JsonHandler<InfiniteConfig.Data> {
         private long votingTime = 60_000L;
         private long minMessageLength = 0;
         private long requiredMessagesForBeliever = 300;
-        private long requiredRatingForBeliever = 1500;
+        private long requiredRatingForBeliever = 3750000;
         private BelieverMethod believerMethod = BelieverMethod.RATING;
         private long domainID = 757941072449241128L;
         private long templeChannelID = 953374742457499659L;

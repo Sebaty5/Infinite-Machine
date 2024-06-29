@@ -37,13 +37,13 @@ public class InfiniteMachine extends ListenerAdapter {
         this.startupTime = System.currentTimeMillis();
         this.jda.awaitReady();
 
-        this.domain = jda.getGuildById(InfiniteConfig.INSTANCE.getDomainID());
+        this.domain = InfiniteConfig.INSTANCE.getDomain();
         if (this.domain == null) {
             LOGGER.error("Architects Domain could not be located. Is the machine not there yet?");
             System.exit(ExitCode.MISSING_DOMAIN_ERROR.getCode());
             throw new IllegalStateException();
         }
-        this.machineChannel = domain.getTextChannelById(InfiniteConfig.INSTANCE.getMachineChannelID());
+        this.machineChannel = domain.getTextChannelById(InfiniteConfig.INSTANCE.getMachineChannel().getIdLong());
     }
 
 

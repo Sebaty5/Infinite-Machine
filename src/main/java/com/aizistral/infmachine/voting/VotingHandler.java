@@ -51,7 +51,7 @@ public class VotingHandler extends ListenerAdapter {
 
 
     private VotingHandler() {
-        Channel channel = InfiniteMachine.INSTANCE.getJDA().getGuildChannelById(InfiniteConfig.INSTANCE.getCouncilChannelID());
+        Channel channel = InfiniteMachine.INSTANCE.getJDA().getGuildChannelById(InfiniteConfig.INSTANCE.getCouncilChannel().getIdLong());
         if(channel instanceof TextChannel) {
             this.councilChannel = (TextChannel) channel;
         }
@@ -82,7 +82,7 @@ public class VotingHandler extends ListenerAdapter {
     }
 
     private void updateBelieverDatabaseWithCurrentBelievers() {
-        Role believerRole = InfiniteMachine.INSTANCE.getDomain().getRoleById(InfiniteConfig.INSTANCE.getBelieversRoleID());
+        Role believerRole = InfiniteMachine.INSTANCE.getDomain().getRoleById(InfiniteConfig.INSTANCE.getBelieversRole().getIdLong());
         InfiniteMachine.INSTANCE.getDomain().findMembersWithRoles(believerRole).onSuccess(list -> {
             list.forEach(member -> {
                 if(!isBeliever(member.getIdLong())) {
@@ -110,7 +110,7 @@ public class VotingHandler extends ListenerAdapter {
         LOGGER.log("Button was pressed.");
         event.deferReply().setEphemeral(true).queue();
         List<Role> roles = Objects.requireNonNull(event.getMember()).getRoles();
-        Role architectRole = Objects.requireNonNull(event.getGuild()).getRoleById(InfiniteConfig.INSTANCE.getArchitectRoleID());
+        Role architectRole = Objects.requireNonNull(event.getGuild()).getRoleById(InfiniteConfig.INSTANCE.getArchitectRole().getIdLong());
         Role overseerRole = Objects.requireNonNull(event.getGuild()).getRoleById(1145688360543862785L);
         Map<String, Object> registeredVote = fetchRegisteredVoteByID(event.getMessage().getIdLong());
         if (roles.contains(architectRole) || roles.contains(overseerRole)) {
@@ -151,13 +151,14 @@ public class VotingHandler extends ListenerAdapter {
     public void createVoteIfNeeded(@NotNull User user) {
         long userID = user.getIdLong();
         if(isBeliever(userID)) return;
-        if(!needVote(userID)) return;
+        if(!needVote(user)) return;
         createVoting(VotingType.BELIEVER_PROMOTION.toString(), user, false);
     }
 
-    private boolean needVote(long userID) {
+    private boolean needVote(User user) {
+        long userID = user.getIdLong();
         if(hasVoting(userID)) return false;
-        if(userID == 866354348489572352L) return true;
+        if(isCursed(user)) return false;
         long voteCount = getVoteAmount(userID);
         long messageCount = CoreMessageIndexer.INSTANCE.getNumberOfMessagesByUserID(userID);
         long totalRating = CoreMessageIndexer.INSTANCE.getRating(userID);
@@ -180,6 +181,14 @@ public class VotingHandler extends ListenerAdapter {
                 break;
         }
         return needsVote;
+    }
+
+    private boolean isCursed(User user) {
+        if(true)
+        {
+
+        }
+        return true;
     }
 
     public boolean createVoting(String type, User votingTarget, boolean isForced) {
@@ -228,11 +237,12 @@ public class VotingHandler extends ListenerAdapter {
 
 
 
-    private boolean isMemberInDomain(User user) {
-        return InfiniteMachine.INSTANCE.getDomain().isMember(user);
+    private boolean isMemberInDomain(@NotNull User user) {
+        Member member = InfiniteMachine.INSTANCE.getDomain().retrieveMember(user).complete();
+        return member != null;
     }
     private boolean isTheArchitect(User user) {
-        return user.getIdLong() == 545239329656799232L;
+        return user.getIdLong() == InfiniteConfig.INSTANCE.getArchitect().getIdLong();
     }
 
     private void addVotingDiscussionThread(Message message, User votingTarget) {
@@ -311,8 +321,8 @@ public class VotingHandler extends ListenerAdapter {
             return;
         }
         Guild domain = InfiniteMachine.INSTANCE.getDomain();
-        Role believerRole = domain.getRoleById(InfiniteConfig.INSTANCE.getBelieversRoleID());
-        Role mereDwellerRole = domain.getRoleById((InfiniteConfig.INSTANCE.getDwellersRoleID()));
+        Role believerRole = domain.getRoleById(InfiniteConfig.INSTANCE.getBelieversRole().getIdLong());
+        Role mereDwellerRole = domain.getRoleById((InfiniteConfig.INSTANCE.getDwellersRole().getIdLong()));
         changeRoleOnMember(believerRole, member, isPromotion);
         changeRoleOnMember(mereDwellerRole, member, !isPromotion);
     }

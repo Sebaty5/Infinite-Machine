@@ -81,7 +81,7 @@ public class CommandHandler extends ListenerAdapter {
     public void onSlashCommandInteraction(SlashCommandInteractionEvent event) {
         LOGGER.log("SlashCommandInteraction received");
 
-        if (event.getChannel().getIdLong() != InfiniteConfig.INSTANCE.getMachineChannelID() && event.getChannel().getIdLong() != InfiniteConfig.INSTANCE.getTempleChannelID() && !"pet".equals(event.getName())) {
+        if (event.getChannel() != InfiniteConfig.INSTANCE.getMachineChannel() && event.getChannel() != InfiniteConfig.INSTANCE.getTempleChannel() && !"pet".equals(event.getName())) {
             event.reply("It is the wrong place and time...").queue();
             return;
         }
@@ -167,17 +167,17 @@ public class CommandHandler extends ListenerAdapter {
 
         //Excluding Arkadiy from normal petting rules
         if (targetID == 440381346339094539L) {
-            if (Utils.hasRole(author, InfiniteConfig.INSTANCE.getPetmasterRoleID())) {
+            if (Utils.hasRole(author, InfiniteConfig.INSTANCE.getPetmasterRole().getIdLong())) {
                 msg = petMasterPetMessage(targetID);
-                msg += String.format("\nYes %s can pet anyone and anything.", Utils.getRoleByID(InfiniteConfig.INSTANCE.getPetmasterRoleID()));
+                msg += String.format("\nYes %s can pet anyone and anything.", Utils.getRoleByID(InfiniteConfig.INSTANCE.getPetmasterRole().getIdLong()));
             } else {
                 msg = "You should know, that a soul can't be `/pet`\nNo matter what machines you wield...";
             }
-        } else if (Utils.hasRole(author, InfiniteConfig.INSTANCE.getPetmasterRoleID())) {
+        } else if (Utils.hasRole(author, InfiniteConfig.INSTANCE.getPetmasterRole().getIdLong())) {
             msg = petMasterPetMessage(targetID);
         }else if (targetID == 814542724010213427L) {
-            if (!Utils.hasRole(author, InfiniteConfig.INSTANCE.getArchitectRoleID())) {
-                msg = String.format("How dare you filthy animal lay hands on the muffin of %s.", Utils.getRoleByID(InfiniteConfig.INSTANCE.getArchitectRoleID()));
+            if (!Utils.hasRole(author, InfiniteConfig.INSTANCE.getArchitectRole().getIdLong())) {
+                msg = String.format("How dare you filthy animal lay hands on the muffin of %s.", Utils.getRoleByID(InfiniteConfig.INSTANCE.getArchitectRole().getIdLong()));
             }
         }  else if (targetID == 1124053065109098708L) { // bot's own ID
             msg = "At the end of times, the <@%s> has pet itself <a:pat_pat_pat:1211592019680694272>";
@@ -187,7 +187,7 @@ public class CommandHandler extends ListenerAdapter {
 
     private String petMasterPetMessage(long targetId) {
         Random rand = new Random();
-        long petmasterID = InfiniteConfig.INSTANCE.getPetmasterRoleID();
+        long petmasterID = InfiniteConfig.INSTANCE.getPetmasterRole().getIdLong();
         ArrayList<String> possibleReactions = new ArrayList<>();
         possibleReactions.add(String.format("In a display of wholesome benevolence, <@%s> has been expertly pet by the skilled hands of %s.", targetId, Utils.getRoleByID(petmasterID)));
         possibleReactions.add(String.format("<@%s> has experienced the gentle touch of a master petter, their contentment evident in every stroke.", targetId));
