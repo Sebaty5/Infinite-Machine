@@ -4,8 +4,10 @@ import java.io.IOException;
 import java.nio.file.Paths;
 
 import com.aizistral.infmachine.InfiniteMachine;
+import com.aizistral.infmachine.Main;
 import com.aizistral.infmachine.data.BelieverMethod;
 
+import com.aizistral.infmachine.data.ExitCode;
 import com.aizistral.infmachine.utils.StandardLogger;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
@@ -62,9 +64,11 @@ public class InfiniteConfig extends JsonHandler<InfiniteConfig.Data> {
     }
     @Override
     public void init() {
-        this.jda = InfiniteMachine.INSTANCE.getJDA();
         this.accessToken = fetchAccessToken();
+    }
 
+    public void load(JDA jda) {
+        this.jda = jda;
         this.votingCheckDelay = fetchVotingCheckDelay();
         this.votingTime = fetchVotingTime();
 
@@ -74,7 +78,11 @@ public class InfiniteConfig extends JsonHandler<InfiniteConfig.Data> {
         this.believerMethod = fetchBelieverMethod();
 
         this.domain = jda.getGuildById(fetchDomainID());
-        assert domain != null;
+        if (this.domain == null) {
+            LOGGER.error("Architects Domain could not be located. Is the machine not there yet?");
+            System.exit(ExitCode.MISSING_DOMAIN_ERROR.getCode());
+        }
+
         this.templeChannel = domain.getTextChannelById(fetchTempleChannelID());
         this.councilChannel = domain.getTextChannelById(fetchCouncilChannelID());
         this.machineChannel = domain.getTextChannelById(fetchMachineChannelID());
@@ -91,6 +99,11 @@ public class InfiniteConfig extends JsonHandler<InfiniteConfig.Data> {
         this.upvoteEmojiID = fetchUpvoteEmojiID();
         this.downvoteEmojiID = fetchDownvoteEmojiID();
         this.crossmarkEmojiID = fetchCrossmarkEmojiID();
+        forceSave();
+    }
+
+    public JDA getJDA() {
+        return jda;
     }
 
     public String getAccessToken() {

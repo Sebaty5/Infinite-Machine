@@ -18,7 +18,7 @@ import net.dv8tion.jda.api.hooks.ListenerAdapter;
 @Getter
 public class InfiniteMachine extends ListenerAdapter {
     protected static final StandardLogger LOGGER = new StandardLogger("InfiniteMachine");
-    public static final InfiniteMachine INSTANCE = new InfiniteMachine(Main.JDA);
+    public static final InfiniteMachine INSTANCE = new InfiniteMachine();
 
     static {
         INSTANCE.awake();
@@ -32,10 +32,9 @@ public class InfiniteMachine extends ListenerAdapter {
     private final TextChannel machineChannel;
 
     @SneakyThrows
-    private InfiniteMachine(JDA jda) {
-        this.jda = jda;
+    private InfiniteMachine() {
+        this.jda = InfiniteConfig.INSTANCE.getJDA();
         this.startupTime = System.currentTimeMillis();
-        this.jda.awaitReady();
 
         this.domain = InfiniteConfig.INSTANCE.getDomain();
         if (this.domain == null) {
