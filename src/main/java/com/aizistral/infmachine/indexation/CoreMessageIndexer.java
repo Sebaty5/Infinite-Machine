@@ -150,9 +150,8 @@ public class CoreMessageIndexer {
         return true;
     }
 
-    // TODO Test for Voice-messages :: Possibly add content evaluation (Filter for word variety)
-    // TODO change scope to private once the indexation rework is complete
-    public static long evaluateMessage(Message messageRaw) {
+    // TODO Test for Voice-messages
+    private static long evaluateMessage(Message messageRaw) {
         if (messageRaw.getType().equals(MessageType.SLASH_COMMAND)) return 0;
 
         // linkLengthValueInChars describes the flat amount of chars that a Link will
