@@ -51,14 +51,11 @@ public class VotingHandler extends ListenerAdapter {
 
 
     private VotingHandler() {
-        Channel channel = InfiniteMachine.INSTANCE.getJDA().getGuildChannelById(InfiniteConfig.INSTANCE.getCouncilChannel().getIdLong());
-        if(channel instanceof TextChannel) {
-            this.councilChannel = (TextChannel) channel;
-        }
+        this.councilChannel = InfiniteConfig.INSTANCE.getCouncilChannel();
         this.databaseHandler = DataBaseHandler.INSTANCE;
         createVotingTable();
         createBelieverTable();
-        InfiniteMachine.INSTANCE.getJDA().addEventListener(this);
+        InfiniteConfig.INSTANCE.getJDA().addEventListener(this);
 
         votingChecker = new VotingChecker(
             () -> {

@@ -1,6 +1,7 @@
 package com.aizistral.infmachine.indexation;
 
 import com.aizistral.infmachine.InfiniteMachine;
+import com.aizistral.infmachine.config.InfiniteConfig;
 import com.aizistral.infmachine.utils.StandardLogger;
 
 import net.dv8tion.jda.api.events.message.GenericMessageEvent;
@@ -14,7 +15,7 @@ public class RealtimeMessageIndexer extends ListenerAdapter {
     private static final StandardLogger LOGGER = new StandardLogger("Realtime Message Indexer");
 
     public RealtimeMessageIndexer(){
-        InfiniteMachine.INSTANCE.getJDA().addEventListener(this);
+        InfiniteConfig.INSTANCE.getJDA().addEventListener(this);
         LOGGER.log("Registered event listener.");
         LOGGER.log("RealtimeIndexer ready.");
     }

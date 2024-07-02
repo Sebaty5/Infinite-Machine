@@ -33,7 +33,7 @@ public class CommandHandler extends ListenerAdapter {
     public static final CommandHandler INSTANCE = new CommandHandler();
 
     private CommandHandler() {
-        InfiniteMachine.INSTANCE.getJDA().addEventListener(this);
+        InfiniteConfig.INSTANCE.getJDA().addEventListener(this);
     }
 
     public void init() {
@@ -43,7 +43,7 @@ public class CommandHandler extends ListenerAdapter {
     private void registerCommands() {
         LOGGER.log("Registering Commands...");
         // TODO Better localization
-        InfiniteMachine.INSTANCE.getJDA().updateCommands().addCommands(
+        InfiniteConfig.INSTANCE.getJDA().updateCommands().addCommands(
                 //Test Commands
                 Commands.slash("ping", Localization.translate("cmd.ping.desc")),
                 Commands.slash("version", Localization.translate("cmd.version.desc")),
@@ -212,7 +212,7 @@ public class CommandHandler extends ListenerAdapter {
         long channelID = channelMapping.getAsChannel().getIdLong();
         String message = messageMapping.getAsString();
 
-        Channel targetChannel = InfiniteMachine.INSTANCE.getJDA().getGuildChannelById(channelID);
+        Channel targetChannel = InfiniteConfig.INSTANCE.getJDA().getGuildChannelById(channelID);
         if (!(targetChannel instanceof TextChannel)) {
             event.reply("The specified channel is not a valid text channel.").queue();
         } else {

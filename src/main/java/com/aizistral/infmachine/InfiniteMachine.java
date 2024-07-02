@@ -13,6 +13,7 @@ import lombok.SneakyThrows;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
+import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 
 @Getter
@@ -23,7 +24,7 @@ public class InfiniteMachine extends ListenerAdapter {
     static {
         INSTANCE.awake();
     }
-    private final JDA jda;
+
     @Getter
     private final long startupTime;
     @Getter
@@ -33,7 +34,6 @@ public class InfiniteMachine extends ListenerAdapter {
 
     @SneakyThrows
     private InfiniteMachine() {
-        this.jda = InfiniteConfig.INSTANCE.getJDA();
         this.startupTime = System.currentTimeMillis();
 
         this.domain = InfiniteConfig.INSTANCE.getDomain();
@@ -64,24 +64,20 @@ public class InfiniteMachine extends ListenerAdapter {
 
     }
 
-    /*
+
     @Override
     public void onMessageReceived(MessageReceivedEvent event) {
         LOGGER.log("Message received");
         if (event.isFromGuild() && event.getGuild() == this.domain) {
-            if (event.getChannel() == this.suggestionsChannel) {
+            if (event.getChannel() == InfiniteConfig.INSTANCE.getSuggestionsChannel()) {
                 if (event.getAuthor().isBot() || event.getAuthor().isSystem())
                     return;
 
-                event.getMessage().addReaction(this.votingHandler.upvote).queue(v -> {
-                    event.getMessage().addReaction(this.votingHandler.downvote).queue();
+                event.getMessage().addReaction(InfiniteConfig.INSTANCE.getUpvoteEmoji()).queue(v -> {
+                    event.getMessage().addReaction(InfiniteConfig.INSTANCE.getDownvoteEmoji()).queue();
                 });
             }
         }
-    }
-    */
-    public JDA getJDA() {
-        return this.jda;
     }
 
     public String getVersion() {

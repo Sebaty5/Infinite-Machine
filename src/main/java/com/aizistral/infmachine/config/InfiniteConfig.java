@@ -17,6 +17,7 @@ import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Role;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
+import net.dv8tion.jda.api.entities.emoji.Emoji;
 
 public class InfiniteConfig extends JsonHandler<InfiniteConfig.Data> {
     protected static final StandardLogger LOGGER = new StandardLogger("InfiniteConfig");
@@ -49,9 +50,9 @@ public class InfiniteConfig extends JsonHandler<InfiniteConfig.Data> {
     private Role dwellersRole;
     private User architect;
 
-    private long upvoteEmojiID;
-    private long downvoteEmojiID;
-    private long crossmarkEmojiID;
+    private Emoji upvoteEmoji;
+    private Emoji downvoteEmoji;
+    private Emoji crossmarkEmoji;
 
     private InfiniteConfig() {
         super(Paths.get("./config/config.json"), 600_000L, Data.class, Data::new);
@@ -96,9 +97,9 @@ public class InfiniteConfig extends JsonHandler<InfiniteConfig.Data> {
         this.dwellersRole = domain.getRoleById(fetchDwellersRoleID());
         this.architect = jda.retrieveUserById(fetchArchitectID()).complete();
 
-        this.upvoteEmojiID = fetchUpvoteEmojiID();
-        this.downvoteEmojiID = fetchDownvoteEmojiID();
-        this.crossmarkEmojiID = fetchCrossmarkEmojiID();
+        this.upvoteEmoji = domain.getEmojiById(fetchUpvoteEmojiID());
+        this.downvoteEmoji = domain.getEmojiById(fetchDownvoteEmojiID());
+        this.crossmarkEmoji = domain.getEmojiById(fetchCrossmarkEmojiID());
         forceSave();
     }
 
@@ -182,16 +183,16 @@ public class InfiniteConfig extends JsonHandler<InfiniteConfig.Data> {
         return architect;
     }
 
-    public long getUpvoteEmojiID() {
-        return upvoteEmojiID;
+    public Emoji getUpvoteEmoji() {
+        return upvoteEmoji;
     }
 
-    public long getDownvoteEmojiID() {
-        return downvoteEmojiID;
+    public Emoji getDownvoteEmoji() {
+        return downvoteEmoji;
     }
 
-    public long getCrossmarkEmojiID() {
-        return crossmarkEmojiID;
+    public Emoji getCrossmarkEmoji() {
+        return crossmarkEmoji;
     }
 
     // --------------------- //
