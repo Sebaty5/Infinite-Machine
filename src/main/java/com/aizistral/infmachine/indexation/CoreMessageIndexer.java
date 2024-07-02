@@ -148,7 +148,7 @@ public class CoreMessageIndexer {
     // TODO Test for Voice-messages
     private static long evaluateMessage(Message messageRaw) {
         if(messageRaw.getType().equals(MessageType.SLASH_COMMAND)) return 0;
-        if(messageRaw.getContentRaw().length() >= InfiniteConfig.INSTANCE.getMinMessageLength()) return 0;
+        if(messageRaw.getContentRaw().length() < InfiniteConfig.INSTANCE.getMinMessageLength()) return 0;
 
         // linkLengthValueInChars describes the flat amount of chars that a Link will
         // contribute to a message Rating
