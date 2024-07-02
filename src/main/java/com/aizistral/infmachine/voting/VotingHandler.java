@@ -171,15 +171,13 @@ public class VotingHandler extends ListenerAdapter {
         return needsVote;
     }
 
-
-    private boolean isCursed(User user) {
-        Member member = Utils.userToMember(user);
-        if(member == null) return false;
-        return member.getRoles().contains(InfiniteConfig.INSTANCE.getCursedRole());
-    }
-
     public boolean createVoting(String type, User votingTarget, boolean isForced) {
-        if(isCursed(votingTarget) || !isMemberInDomain(votingTarget) || isTheArchitect(votingTarget)) return false;
+        Member member = Utils.userToMember(votingTarget);
+        if( member == null || isTheArchitect(votingTarget)) return false;
+        if(isCursed(member)){
+            addBelieverVoteCount(member.getIdLong(), 1);
+            return false;
+        }
         String votingInformation;
         String positiveAnswerDescription;
         String negativeAnswerDescription;
@@ -222,9 +220,8 @@ public class VotingHandler extends ListenerAdapter {
         return false;
     }
 
-    private boolean isMemberInDomain(@NotNull User user) {
-        Member member = Utils.userToMember(user);
-        return member != null;
+    private boolean isCursed(Member member) {
+        return member.getRoles().contains(InfiniteConfig.INSTANCE.getCursedRole());
     }
     private boolean isTheArchitect(User user) {
         return user.getIdLong() == InfiniteConfig.INSTANCE.getArchitect().getIdLong();
