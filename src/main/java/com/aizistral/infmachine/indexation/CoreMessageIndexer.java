@@ -8,6 +8,7 @@ import com.aizistral.infmachine.utils.StandardLogger;
 import com.aizistral.infmachine.utils.Utils;
 
 import com.aizistral.infmachine.voting.VotingHandler;
+import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageType;
 import net.dv8tion.jda.api.entities.User;
@@ -72,6 +73,11 @@ public class CoreMessageIndexer {
     public void indexMessage(Message message) {
         long messageID = message.getIdLong();
         User user = isValidMessage(message) ? getUserOfMessage(message) : null;
+        Member member = Utils.userToMember(user);
+        if(member == null) {
+            LOGGER.log("Received message outside of domain. Will not index.");
+            return;
+        }
         long userID = user != null ? user.getIdLong() : -1L;
         long channelID = message.getChannel().getIdLong();
         long rating = evaluateMessage(message);
@@ -79,7 +85,7 @@ public class CoreMessageIndexer {
         String sql = String.format("REPLACE INTO %s (messageID, authorID, channelID, messageRating, timeStamp) VALUES(%d,%d,%d,%d,%d)", indexTableName,messageID, userID, channelID, rating, time);
         databaseHandler.executeSQL(sql);
         if(user != null) {
-            VotingHandler.INSTANCE.createVoteIfNeeded(user);
+            VotingHandler.INSTANCE.createVoteIfNeeded(member);
         }
     }
 
@@ -137,6 +143,8 @@ public class CoreMessageIndexer {
     private User getUserOfMessage(Message message) {
         return message.getInteraction() != null ? message.getInteraction().getUser() : message.getAuthor();
     }
+
+
 
     private boolean isValidMessage(Message message) {
         User user = getUserOfMessage(message);

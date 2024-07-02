@@ -4,6 +4,7 @@ import com.aizistral.infmachine.config.InfiniteConfig;
 import lombok.experimental.UtilityClass;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.Role;
+import net.dv8tion.jda.api.entities.User;
 
 import java.util.List;
 
@@ -25,5 +26,9 @@ public class Utils {
             if(role.getIdLong() == roleID) return role;
         }
         return null;
+    }
+
+    public static Member userToMember(User user) {
+        return InfiniteConfig.INSTANCE.getDomain().retrieveMember(user).complete();
     }
 }

@@ -9,6 +9,7 @@ import com.aizistral.infmachine.database.Table;
 import com.aizistral.infmachine.indexation.CoreMessageIndexer;
 import com.aizistral.infmachine.utils.StandardLogger;
 
+import com.aizistral.infmachine.utils.Utils;
 import lombok.Getter;
 import net.dv8tion.jda.api.entities.*;
 import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
@@ -119,7 +120,8 @@ public class VotingHandler extends ListenerAdapter {
     // --------------- //
     public void createManualVoting(SlashCommandInteractionEvent event) {
         OptionMapping mapping = event.getOption("user");
-        User votingTarget = mapping != null ? mapping.getAsUser() : null;
+        User votingTargetUser = mapping != null ? mapping.getAsUser() : null;
+        Member votingTarget = Utils.userToMember(votingTargetUser);
         if(votingTarget == null) {
             event.reply("Specified user could not be found.").queue();
             return;
@@ -136,17 +138,17 @@ public class VotingHandler extends ListenerAdapter {
         else event.reply("Voting creation failed. Please check that the User is a Member of the Domain and the voting type is correct.").queue();
     }
 
-    public void createVoteIfNeeded(@NotNull User user) {
-        long userID = user.getIdLong();
+    public void createVoteIfNeeded(@NotNull Member member) {
+        long userID = member.getIdLong();
         if(isBeliever(userID)) return;
-        if(!needVote(user)) return;
-        createVoting(VotingType.BELIEVER_PROMOTION.toString(), user, false);
+        if(!needVote(member)) return;
+        createVoting(VotingType.BELIEVER_PROMOTION.toString(), member, false);
     }
 
-    private boolean needVote(User user) {
-        long userID = user.getIdLong();
+    private boolean needVote(Member member) {
+        long userID = member.getIdLong();
         if(hasVoting(userID)) return false;
-        if(isCursed(user)) return false;
+        if(isCursed(member)) return false;
         long voteCount = getVoteAmount(userID);
         long messageCount = CoreMessageIndexer.INSTANCE.getNumberOfMessagesByUserID(userID);
         long totalRating = CoreMessageIndexer.INSTANCE.getRating(userID);
@@ -172,13 +174,12 @@ public class VotingHandler extends ListenerAdapter {
     }
 
 
-    private boolean isCursed(User user) {
-        Member member = InfiniteConfig.INSTANCE.getDomain().retrieveMemberById(user.getIdLong()).complete();
+    private boolean isCursed(Member member) {
         return member.getRoles().contains(InfiniteConfig.INSTANCE.getCursedRole());
     }
 
-    public boolean createVoting(String type, User votingTarget, boolean isForced) {
-        if(!isMemberInDomain(votingTarget) || isTheArchitect(votingTarget)) return false;
+    public boolean createVoting(String type, Member votingTarget, boolean isForced) {
+        if(isTheArchitect(votingTarget)) return false;
         String votingInformation;
         String positiveAnswerDescription;
         String negativeAnswerDescription;
@@ -215,7 +216,7 @@ public class VotingHandler extends ListenerAdapter {
             .complete();
             LOGGER.log("Registering voting in database.");
             addVotingToDatabase(votingMessage.getIdLong(), votingTarget.getIdLong(), type);
-            addVotingDiscussionThread(votingMessage, votingTarget);
+            addVotingDiscussionThread(votingMessage, votingTarget.getUser());
             return true;
         }
         return false;
@@ -227,7 +228,7 @@ public class VotingHandler extends ListenerAdapter {
         Member member = InfiniteConfig.INSTANCE.getDomain().retrieveMember(user).complete();
         return member != null;
     }
-    private boolean isTheArchitect(User user) {
+    private boolean isTheArchitect(Member user) {
         return user.getIdLong() == InfiniteConfig.INSTANCE.getArchitect().getIdLong();
     }
 
