@@ -9,6 +9,7 @@ import com.aizistral.infmachine.database.Table;
 import com.aizistral.infmachine.indexation.CoreMessageIndexer;
 import com.aizistral.infmachine.utils.StandardLogger;
 
+import com.aizistral.infmachine.utils.Utils;
 import lombok.Getter;
 import net.dv8tion.jda.api.entities.*;
 import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
@@ -146,7 +147,6 @@ public class VotingHandler extends ListenerAdapter {
     private boolean needVote(User user) {
         long userID = user.getIdLong();
         if(hasVoting(userID)) return false;
-        if(isCursed(user)) return false;
         long voteCount = getVoteAmount(userID);
         long messageCount = CoreMessageIndexer.INSTANCE.getNumberOfMessagesByUserID(userID);
         long totalRating = CoreMessageIndexer.INSTANCE.getRating(userID);
@@ -173,12 +173,13 @@ public class VotingHandler extends ListenerAdapter {
 
 
     private boolean isCursed(User user) {
-        Member member = InfiniteConfig.INSTANCE.getDomain().retrieveMemberById(user.getIdLong()).complete();
+        Member member = Utils.userToMember(user);
+        if(member == null) return false;
         return member.getRoles().contains(InfiniteConfig.INSTANCE.getCursedRole());
     }
 
     public boolean createVoting(String type, User votingTarget, boolean isForced) {
-        if(!isMemberInDomain(votingTarget) || isTheArchitect(votingTarget)) return false;
+        if(isCursed(votingTarget) || !isMemberInDomain(votingTarget) || isTheArchitect(votingTarget)) return false;
         String votingInformation;
         String positiveAnswerDescription;
         String negativeAnswerDescription;
