@@ -231,9 +231,7 @@ public class VotingHandler extends ListenerAdapter {
         String date = LocalDateTime.now().format(FORMATTER);
         String name = votingTarget.getEffectiveName();
         String threadName = Localization.translate("title.votingThread",name, date);
-        message.createThreadChannel(threadName).queue(c -> {
-                    c.sendMessage("May your vote be cast in good spirit and with honest intention.").queue();
-                });
+        message.createThreadChannel(threadName).queue(c -> c.sendMessage("May your vote be cast in good spirit and with honest intention.").queue());
 
     }
 
