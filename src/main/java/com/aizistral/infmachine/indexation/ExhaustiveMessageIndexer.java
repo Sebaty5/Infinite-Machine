@@ -34,7 +34,10 @@ public class ExhaustiveMessageIndexer implements Runnable{
     public ExhaustiveMessageIndexer(Runnable callbackOnSuccess, Runnable callbackOnFailure) {
         this.callbackOnSuccess = callbackOnSuccess;
         this.callbackOnFailure = callbackOnFailure;
-        setFullIndex(false);
+        //sets the full index to true on the very first indexation run
+        // and then sets the database into a state where the first indexation has been completed
+        // once the indexation runner has successfully indexed for the first time
+        setFullIndex(!DataBaseHandler.INSTANCE.retrievePrimalIndexation());
         LOGGER.log("ExhaustiveIndexer ready, awaiting orders.");
     }
     @Override
@@ -45,6 +48,7 @@ public class ExhaustiveMessageIndexer implements Runnable{
             executeReindex();
             callbackOnSuccess.run();
             LOGGER.log("Indexation completed. Full success");
+            DataBaseHandler.INSTANCE.setPrimalIndexation();
         } catch(Exception ex) {
             callbackOnFailure.run();
             LOGGER.error("Indexer experienced Fatal Error:" + Arrays.toString(ex.getStackTrace()));
