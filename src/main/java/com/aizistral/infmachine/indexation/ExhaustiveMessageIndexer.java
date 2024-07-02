@@ -48,7 +48,6 @@ public class ExhaustiveMessageIndexer implements Runnable{
             executeReindex();
             callbackOnSuccess.run();
             LOGGER.log("Indexation completed. Full success");
-            DataBaseHandler.INSTANCE.setPrimalIndexation();
         } catch(Exception ex) {
             callbackOnFailure.run();
             LOGGER.error("Indexer experienced Fatal Error:" + Arrays.toString(ex.getStackTrace()));
@@ -66,6 +65,7 @@ public class ExhaustiveMessageIndexer implements Runnable{
         indexAllMessages(isFullIndex);
         LOGGER.log("Indexation completed. Resuming normal operations.");
         setFullIndex(false);
+        DataBaseHandler.INSTANCE.setPrimalIndexation();
     }
 
     public void setFullIndex(boolean isFullIndex) {

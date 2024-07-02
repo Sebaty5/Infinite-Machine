@@ -47,16 +47,10 @@ public class CoreMessageIndexer {
         exhaustiveMessageIndexer.stop();
         clearTable();
         exhaustiveMessageIndexer.setFullIndex(true);
-        startExhaustiveIndexRunner();
+        index();
     }
 
     public void index() {
-        exhaustiveMessageIndexer.stop();
-        exhaustiveMessageIndexer.setFullIndex(false);
-        startExhaustiveIndexRunner();
-    }
-
-    private void startExhaustiveIndexRunner() {
         createMessageIndexTable();
         Thread exhaustiveIndexer = new Thread(exhaustiveMessageIndexer, "IndexerCatchUp-Thread");
         exhaustiveIndexer.start();

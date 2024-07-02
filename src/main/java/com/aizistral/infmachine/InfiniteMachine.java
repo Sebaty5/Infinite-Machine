@@ -42,7 +42,7 @@ public class InfiniteMachine extends ListenerAdapter {
 
     private void awake() {
         CommandHandler.INSTANCE.init();
-        CoreMessageIndexer.INSTANCE.index();
+        CoreMessageIndexer.INSTANCE.index();;
         VotingHandler.INSTANCE.init();
 
         LOGGER.log("Domain channels: " + this.domain.getChannels().size());
