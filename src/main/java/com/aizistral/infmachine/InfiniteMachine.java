@@ -40,8 +40,6 @@ public class InfiniteMachine extends ListenerAdapter {
         }
     }
 
-
-
     private void awake() {
         CommandHandler.INSTANCE.init();
         CoreMessageIndexer.INSTANCE.index();
@@ -55,19 +53,14 @@ public class InfiniteMachine extends ListenerAdapter {
             DataBaseHandler.INSTANCE.setInfiniteVersion(version);
             InfiniteConfig.INSTANCE.getMachineChannel().sendMessage(String.format("<:the_cube:963161249028378735> Version **%s** of Infinite Machine was deployed successfully.", version)).queue();
         }
-
-
     }
-
 
     @Override
     public void onMessageReceived(MessageReceivedEvent event) {
         LOGGER.log("Message received");
         if (event.isFromGuild() && event.getGuild() == this.domain) {
             if (event.getChannel() == InfiniteConfig.INSTANCE.getSuggestionsChannel()) {
-                if (event.getAuthor().isBot() || event.getAuthor().isSystem())
-                    return;
-
+                if (event.getAuthor().isBot() || event.getAuthor().isSystem()) return;
                 event.getMessage().addReaction(InfiniteConfig.INSTANCE.getUpvoteEmoji()).queue(v -> event.getMessage().addReaction(InfiniteConfig.INSTANCE.getDownvoteEmoji()).queue());
             }
         }
