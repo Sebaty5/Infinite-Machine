@@ -3,6 +3,7 @@ package com.aizistral.infmachine.indexation;
 import com.aizistral.infmachine.config.InfiniteConfig;
 import com.aizistral.infmachine.utils.StandardLogger;
 
+import net.dv8tion.jda.api.events.channel.ChannelDeleteEvent;
 import net.dv8tion.jda.api.events.message.GenericMessageEvent;
 import net.dv8tion.jda.api.events.message.MessageDeleteEvent;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
@@ -46,5 +47,13 @@ public class RealtimeMessageIndexer extends ListenerAdapter {
         if (!messageEvent.isFromGuild()) return false;
         if (messageEvent.getGuild() != InfiniteConfig.INSTANCE.getDomain()) return false;
         return true;
+    }
+
+    @Override
+    public void onChannelDelete(@NotNull ChannelDeleteEvent event){
+        LOGGER.log("Channel Deleted");
+        if(event.isFromGuild() && event.getGuild() == InfiniteConfig.INSTANCE.getDomain()) {
+            CoreMessageIndexer.INSTANCE.unindexChannel(event.getChannel().getIdLong());
+        }
     }
 }

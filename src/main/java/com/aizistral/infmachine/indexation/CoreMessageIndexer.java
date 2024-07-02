@@ -88,6 +88,11 @@ public class CoreMessageIndexer {
         databaseHandler.executeSQL(sql);
     }
 
+    public void unindexChannel(long deletedChannelID) {
+        String sql = String.format("DELETE FROM %s WHERE channelID = %d", indexTableName, deletedChannelID);
+        databaseHandler.executeSQL(sql);
+    }
+
     // --------------- //
     // Database Access //
     // --------------- //
@@ -161,4 +166,6 @@ public class CoreMessageIndexer {
 
         return length * length;
     }
+
+
 }
