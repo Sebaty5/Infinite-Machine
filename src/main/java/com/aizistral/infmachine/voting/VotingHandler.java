@@ -1,6 +1,5 @@
 package com.aizistral.infmachine.voting;
 
-import com.aizistral.infmachine.InfiniteMachine;
 import com.aizistral.infmachine.config.InfiniteConfig;
 import com.aizistral.infmachine.config.Localization;
 import com.aizistral.infmachine.data.ExitCode;
@@ -12,7 +11,6 @@ import com.aizistral.infmachine.utils.StandardLogger;
 
 import lombok.Getter;
 import net.dv8tion.jda.api.entities.*;
-import net.dv8tion.jda.api.entities.channel.Channel;
 import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
 import net.dv8tion.jda.api.entities.channel.concrete.ThreadChannel;
 import net.dv8tion.jda.api.entities.emoji.Emoji;
@@ -42,7 +40,7 @@ public class VotingHandler extends ListenerAdapter {
     public static final VotingHandler INSTANCE = new VotingHandler();
 
     @Getter
-    private TextChannel councilChannel = null;
+    private final TextChannel councilChannel;
     private final DataBaseHandler databaseHandler;
     @Getter
     private final String votingTableName = "voting";
@@ -58,13 +56,8 @@ public class VotingHandler extends ListenerAdapter {
         InfiniteConfig.INSTANCE.getJDA().addEventListener(this);
 
         votingChecker = new VotingChecker(
-            () -> {
-                //InfiniteMachine.INSTANCE.getMachineChannel().sendMessage(String.format("All registered votings have been checked and updated.")).queue();
-                LOGGER.log("All registered votings have been checked and updated.");
-            },
-            () -> {
-                InfiniteMachine.INSTANCE.getMachineChannel().sendMessage(String.format("Registered votings could not be checked.")).queue();
-            }
+            () -> LOGGER.log("All registered votings have been checked and updated."),
+            () -> InfiniteConfig.INSTANCE.getMachineChannel().sendMessage("Registered votings could not be checked.").queue()
         );
     }
 
@@ -79,15 +72,13 @@ public class VotingHandler extends ListenerAdapter {
     }
 
     private void updateBelieverDatabaseWithCurrentBelievers() {
-        Role believerRole = InfiniteMachine.INSTANCE.getDomain().getRoleById(InfiniteConfig.INSTANCE.getBelieversRole().getIdLong());
-        InfiniteMachine.INSTANCE.getDomain().findMembersWithRoles(believerRole).onSuccess(list -> {
-            list.forEach(member -> {
-                if(!isBeliever(member.getIdLong())) {
-                    promoteBelieverInDatabase(member.getIdLong());
-                    LOGGER.log(String.format("Updated database believer status for %s.", member.getEffectiveName()));
-                }
-            });
-        });
+        Role believerRole = InfiniteConfig.INSTANCE.getDomain().getRoleById(InfiniteConfig.INSTANCE.getBelieversRole().getIdLong());
+        InfiniteConfig.INSTANCE.getDomain().findMembersWithRoles(believerRole).onSuccess(list -> list.forEach(member -> {
+            if(!isBeliever(member.getIdLong())) {
+                promoteBelieverInDatabase(member.getIdLong());
+                LOGGER.log(String.format("Updated database believer status for %s.", member.getEffectiveName()));
+            }
+        }));
     }
 
     @Override
@@ -180,17 +171,15 @@ public class VotingHandler extends ListenerAdapter {
         return needsVote;
     }
 
-    private boolean isCursed(User user) {
-        if(true)
-        {
 
-        }
-        return true;
+    private boolean isCursed(User user) {
+        Member member = InfiniteConfig.INSTANCE.getDomain().retrieveMemberById(user.getIdLong()).complete();
+        return member.getRoles().contains(InfiniteConfig.INSTANCE.getCursedRole());
     }
 
     public boolean createVoting(String type, User votingTarget, boolean isForced) {
         if(!isMemberInDomain(votingTarget) || isTheArchitect(votingTarget)) return false;
-        String votingInformation = "";
+        String votingInformation;
         String positiveAnswerDescription;
         String negativeAnswerDescription;
         if (type.equals(VotingType.BELIEVER_PROMOTION.toString()) && !isForced) {
@@ -212,7 +201,7 @@ public class VotingHandler extends ListenerAdapter {
         MessagePollData poll = MessagePollData.builder("Do you agree with this Voting?")
                 .addAnswer(positiveAnswerDescription, Emoji.fromFormatted("<:upvote:946944717982142464>"))
                 .addAnswer(negativeAnswerDescription, Emoji.fromFormatted("<:downvote:946944748491522098>"))
-                .setDuration(2, TimeUnit.DAYS)
+                .setDuration(InfiniteConfig.INSTANCE.getVotingTime(), TimeUnit.HOURS)
                 .build();
 
         if(councilChannel != null)
@@ -235,7 +224,7 @@ public class VotingHandler extends ListenerAdapter {
 
 
     private boolean isMemberInDomain(@NotNull User user) {
-        Member member = InfiniteMachine.INSTANCE.getDomain().retrieveMember(user).complete();
+        Member member = InfiniteConfig.INSTANCE.getDomain().retrieveMember(user).complete();
         return member != null;
     }
     private boolean isTheArchitect(User user) {
@@ -288,11 +277,9 @@ public class VotingHandler extends ListenerAdapter {
             System.exit(ExitCode.PROGRAM_LOGIC_ERROR.getCode());
         }
 
-        Guild domain = InfiniteMachine.INSTANCE.getDomain();
+        Guild domain = InfiniteConfig.INSTANCE.getDomain();
         VotingType finalVotingType = votingType;
-        domain.retrieveMemberById((long) vote.get("voteTargetID")).queue(member -> {
-            finalExecution(message, wasSuccessful, member, finalVotingType, wasOverruled);
-        });
+        domain.retrieveMemberById((long) vote.get("voteTargetID")).queue(member -> finalExecution(message, wasSuccessful, member, finalVotingType, wasOverruled));
     }
 
     private void finalExecution(Message message, boolean wasSuccessful, Member member, VotingType finalVotingType, boolean wasOverruled) {
@@ -317,7 +304,7 @@ public class VotingHandler extends ListenerAdapter {
             LOGGER.log("Member was not found in guild. Can't add role.");
             return;
         }
-        Guild domain = InfiniteMachine.INSTANCE.getDomain();
+        Guild domain = InfiniteConfig.INSTANCE.getDomain();
         Role believerRole = domain.getRoleById(InfiniteConfig.INSTANCE.getBelieversRole().getIdLong());
         Role mereDwellerRole = domain.getRoleById((InfiniteConfig.INSTANCE.getDwellersRole().getIdLong()));
         changeRoleOnMember(believerRole, member, isPromotion);
@@ -330,7 +317,7 @@ public class VotingHandler extends ListenerAdapter {
             System.exit(ExitCode.PROGRAM_LOGIC_ERROR.getCode());
             return;
         }
-        Guild domain = InfiniteMachine.INSTANCE.getDomain();
+        Guild domain = InfiniteConfig.INSTANCE.getDomain();
         if(add) {
             domain.addRoleToMember(member, role).queue(
                     success -> LOGGER.log("Role added successfully."),

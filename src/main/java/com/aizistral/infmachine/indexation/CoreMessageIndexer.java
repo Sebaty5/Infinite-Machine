@@ -1,6 +1,6 @@
 package com.aizistral.infmachine.indexation;
 
-import com.aizistral.infmachine.InfiniteMachine;
+import com.aizistral.infmachine.config.InfiniteConfig;
 import com.aizistral.infmachine.database.DataBaseHandler;
 import com.aizistral.infmachine.database.FieldType;
 import com.aizistral.infmachine.database.Table;
@@ -33,12 +33,8 @@ public class CoreMessageIndexer {
         prepareDatabase();
         this.realtimeMessageIndexer = new RealtimeMessageIndexer();
         this.exhaustiveMessageIndexer = new ExhaustiveMessageIndexer(
-            () -> {
-                InfiniteMachine.INSTANCE.getMachineChannel().sendMessage(String.format("Convergence achieved. All data accounted for.")).queue();
-            },
-            () -> {
-                InfiniteMachine.INSTANCE.getMachineChannel().sendMessage(String.format("Indexer encountered critical error. Please restart process.")).queue();
-            }
+            () -> InfiniteConfig.INSTANCE.getMachineChannel().sendMessage("Convergence achieved. All data accounted for.").queue(),
+            () -> InfiniteConfig.INSTANCE.getMachineChannel().sendMessage("Indexer encountered critical error. Please restart process.").queue()
         );
         LOGGER.log("CoreMessageIndexer instantiated.");
     }
@@ -127,8 +123,7 @@ public class CoreMessageIndexer {
         String sql = String.format("SELECT SUM(messageRating) as rating FROM %s WHERE authorID = %d",CoreMessageIndexer.INSTANCE.getIndexTableName(), authorID);
         List<Map<String, Object>> entries = DataBaseHandler.INSTANCE.executeQuerySQL(sql);
         if(entries == null) return 0;
-        long internalRating =  ((Integer) entries.get(0).get("rating")).longValue();
-        return internalRating;
+        return ((Integer) entries.get(0).get("rating")).longValue();
     }
 
     private void clearTable() {

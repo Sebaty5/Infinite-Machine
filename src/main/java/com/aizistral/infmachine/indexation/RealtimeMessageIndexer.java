@@ -1,6 +1,5 @@
 package com.aizistral.infmachine.indexation;
 
-import com.aizistral.infmachine.InfiniteMachine;
 import com.aizistral.infmachine.config.InfiniteConfig;
 import com.aizistral.infmachine.utils.StandardLogger;
 
@@ -36,7 +35,7 @@ public class RealtimeMessageIndexer extends ListenerAdapter {
     }
 
     @Override
-    public void onMessageUpdate(@NotNull MessageUpdateEvent event) { //ToDo Check whether this works as intended or change if necessary
+    public void onMessageUpdate(@NotNull MessageUpdateEvent event) {
         if(isValidMessageEvent(event)) {
             CoreMessageIndexer.INSTANCE.indexMessage(event.getMessage());
         }
@@ -45,7 +44,7 @@ public class RealtimeMessageIndexer extends ListenerAdapter {
     public boolean isValidMessageEvent(GenericMessageEvent messageEvent)
     {
         if (!messageEvent.isFromGuild()) return false;
-        if (messageEvent.getGuild() != InfiniteMachine.INSTANCE.getDomain()) return false;
+        if (messageEvent.getGuild() != InfiniteConfig.INSTANCE.getDomain()) return false;
         return true;
     }
 }

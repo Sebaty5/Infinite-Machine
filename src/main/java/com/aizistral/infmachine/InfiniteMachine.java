@@ -10,9 +10,7 @@ import com.aizistral.infmachine.utils.StandardLogger;
 import com.aizistral.infmachine.voting.VotingHandler;
 import lombok.Getter;
 import lombok.SneakyThrows;
-import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.Guild;
-import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 
@@ -29,8 +27,6 @@ public class InfiniteMachine extends ListenerAdapter {
     private final long startupTime;
     @Getter
     private final Guild domain;
-    @Getter
-    private final TextChannel machineChannel;
 
     @SneakyThrows
     private InfiniteMachine() {
@@ -42,7 +38,6 @@ public class InfiniteMachine extends ListenerAdapter {
             System.exit(ExitCode.MISSING_DOMAIN_ERROR.getCode());
             throw new IllegalStateException();
         }
-        this.machineChannel = domain.getTextChannelById(InfiniteConfig.INSTANCE.getMachineChannel().getIdLong());
     }
 
 
@@ -58,7 +53,7 @@ public class InfiniteMachine extends ListenerAdapter {
         String version = this.getVersion();
         if (!DataBaseHandler.INSTANCE.retrieveInfiniteVersion().equals(version)){
             DataBaseHandler.INSTANCE.setInfiniteVersion(version);
-            this.machineChannel.sendMessage(String.format("<:the_cube:963161249028378735> Version **%s** of Infinite Machine was deployed successfully.", version)).queue();
+            InfiniteConfig.INSTANCE.getMachineChannel().sendMessage(String.format("<:the_cube:963161249028378735> Version **%s** of Infinite Machine was deployed successfully.", version)).queue();
         }
 
 
@@ -73,9 +68,7 @@ public class InfiniteMachine extends ListenerAdapter {
                 if (event.getAuthor().isBot() || event.getAuthor().isSystem())
                     return;
 
-                event.getMessage().addReaction(InfiniteConfig.INSTANCE.getUpvoteEmoji()).queue(v -> {
-                    event.getMessage().addReaction(InfiniteConfig.INSTANCE.getDownvoteEmoji()).queue();
-                });
+                event.getMessage().addReaction(InfiniteConfig.INSTANCE.getUpvoteEmoji()).queue(v -> event.getMessage().addReaction(InfiniteConfig.INSTANCE.getDownvoteEmoji()).queue());
             }
         }
     }

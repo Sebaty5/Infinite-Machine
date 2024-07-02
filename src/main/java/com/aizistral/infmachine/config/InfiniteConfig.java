@@ -3,8 +3,6 @@ package com.aizistral.infmachine.config;
 import java.io.IOException;
 import java.nio.file.Paths;
 
-import com.aizistral.infmachine.InfiniteMachine;
-import com.aizistral.infmachine.Main;
 import com.aizistral.infmachine.data.BelieverMethod;
 
 import com.aizistral.infmachine.data.ExitCode;
@@ -27,8 +25,6 @@ public class InfiniteConfig extends JsonHandler<InfiniteConfig.Data> {
     private JDA jda;
 
     private String accessToken;
-
-    private long votingCheckDelay;
     private long votingTime;
 
     private long minMessageLength;
@@ -48,6 +44,7 @@ public class InfiniteConfig extends JsonHandler<InfiniteConfig.Data> {
     private Role believersRole;
     private Role beholdersRole;
     private Role dwellersRole;
+    private Role cursedRole;
     private User architect;
 
     private Emoji upvoteEmoji;
@@ -70,7 +67,6 @@ public class InfiniteConfig extends JsonHandler<InfiniteConfig.Data> {
 
     public void load(JDA jda) {
         this.jda = jda;
-        this.votingCheckDelay = fetchVotingCheckDelay();
         this.votingTime = fetchVotingTime();
 
         this.minMessageLength = fetchMinMessageLength();
@@ -95,6 +91,7 @@ public class InfiniteConfig extends JsonHandler<InfiniteConfig.Data> {
         this.believersRole = domain.getRoleById(fetchBelieversRoleID());
         this.beholdersRole = domain.getRoleById(fetchBeholdersRoleID());
         this.dwellersRole = domain.getRoleById(fetchDwellersRoleID());
+        this.cursedRole = domain.getRoleById((fetchCursedRoleID()));
         this.architect = jda.retrieveUserById(fetchArchitectID()).complete();
 
         this.upvoteEmoji = domain.getEmojiById(fetchUpvoteEmojiID());
@@ -103,16 +100,14 @@ public class InfiniteConfig extends JsonHandler<InfiniteConfig.Data> {
         forceSave();
     }
 
+
+
     public JDA getJDA() {
         return jda;
     }
 
     public String getAccessToken() {
         return accessToken;
-    }
-
-    public long getVotingCheckDelay() {
-        return votingCheckDelay;
     }
 
     public long getVotingTime() {
@@ -179,6 +174,10 @@ public class InfiniteConfig extends JsonHandler<InfiniteConfig.Data> {
         return dwellersRole;
     }
 
+    public Role getCursedRole() {
+        return cursedRole;
+    }
+
     public User getArchitect() {
         return architect;
     }
@@ -208,19 +207,10 @@ public class InfiniteConfig extends JsonHandler<InfiniteConfig.Data> {
         }
     }
 
-    private long fetchVotingCheckDelay() {
-        try {
-            this.readLock.lock();
-            return this.getData().votingCheckDelay;
-        } finally {
-            this.readLock.unlock();
-        }
-    }
-
     private long fetchVotingTime() {
         try {
             this.readLock.lock();
-            return this.getData().votingTime;
+            return this.getData().votingTimeInHours;
         } finally {
             this.readLock.unlock();
         }
@@ -316,6 +306,15 @@ public class InfiniteConfig extends JsonHandler<InfiniteConfig.Data> {
         }
     }
 
+    private long fetchCursedRoleID() {
+        try {
+            this.readLock.lock();
+            return this.getData().cursedRoleID;
+        } finally {
+            this.readLock.unlock();
+        }
+    }
+
     private long fetchDwellersRoleID() {
         try {
             this.readLock.lock();
@@ -397,11 +396,12 @@ public class InfiniteConfig extends JsonHandler<InfiniteConfig.Data> {
         }
     }
 
+
+
     @NoArgsConstructor(access = AccessLevel.PRIVATE)
     static final class Data {
         private String accessToken = "";
-        private long votingCheckDelay = 60_000L;
-        private long votingTime = 60_000L;
+        private long votingTimeInHours = 1;
         private long minMessageLength = 0;
         private long requiredMessagesForBeliever = 300;
         private long requiredRatingForBeliever = 3750000;
@@ -412,6 +412,7 @@ public class InfiniteConfig extends JsonHandler<InfiniteConfig.Data> {
         private long councilChannelID = 1133412399936970802L;
         private long suggestionsChannelID = 986594094270795776L;
         private long believersRoleID = 771377288927117342L;
+        private long cursedRoleID = 1157706494695985275L;
         private long dwellersRoleID = 964930040359964752L;
         private long beholdersRoleID = 964940092215021678L;
         private long architectRoleID = 757943753779445850L;

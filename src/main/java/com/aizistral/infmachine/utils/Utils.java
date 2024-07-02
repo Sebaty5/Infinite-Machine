@@ -1,6 +1,6 @@
 package com.aizistral.infmachine.utils;
 
-import com.aizistral.infmachine.InfiniteMachine;
+import com.aizistral.infmachine.config.InfiniteConfig;
 import lombok.experimental.UtilityClass;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.Role;
@@ -20,7 +20,7 @@ public class Utils {
     }
 
     public Role getRoleByID(long roleID) {
-        List<Role> domainRoles = InfiniteMachine.INSTANCE.getDomain().getRoles();
+        List<Role> domainRoles = InfiniteConfig.INSTANCE.getDomain().getRoles();
         for(Role role : domainRoles) {
             if(role.getIdLong() == roleID) return role;
         }
