@@ -222,10 +222,8 @@ public class VotingHandler extends ListenerAdapter {
         return false;
     }
 
-
-
     private boolean isMemberInDomain(@NotNull User user) {
-        Member member = InfiniteConfig.INSTANCE.getDomain().retrieveMember(user).complete();
+        Member member = Utils.userToMember(user);
         return member != null;
     }
     private boolean isTheArchitect(User user) {
@@ -237,7 +235,7 @@ public class VotingHandler extends ListenerAdapter {
         String name = votingTarget.getEffectiveName();
         String threadName = Localization.translate("title.votingThread",name, date);
         message.createThreadChannel(threadName).queue(c -> {
-                    //c.sendMessage("May your vote be cast in good spirit and with honest intention.").queue();
+                    c.sendMessage("May your vote be cast in good spirit and with honest intention.").queue();
                 });
 
     }
@@ -440,7 +438,7 @@ public class VotingHandler extends ListenerAdapter {
         String sql = String.format("SELECT * FROM %s WHERE memberID = %d", believerTableName, userID);
         List<Map<String, Object>> results = databaseHandler.executeQuerySQL(sql);
         if(results.isEmpty()) return false;
-        return "true".equals((String) results.get(0).get("isBeliever"));
+        return "true".equals(results.get(0).get("isBeliever"));
     }
 
 
