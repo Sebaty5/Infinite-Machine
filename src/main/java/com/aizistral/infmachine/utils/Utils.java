@@ -31,6 +31,7 @@ public class Utils {
         return null;
     }
 
+    //Quite slow so should only be called when absolutely necessary
     public static Member userToMember(User user) {
         if(user == null) return null;
         Member member = null;
