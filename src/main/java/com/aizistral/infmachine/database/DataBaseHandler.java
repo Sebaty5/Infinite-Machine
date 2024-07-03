@@ -3,6 +3,7 @@ package com.aizistral.infmachine.database;
 import com.aizistral.infmachine.data.ExitCode;
 import com.aizistral.infmachine.utils.StandardLogger;
 
+import java.io.File;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -11,7 +12,8 @@ import java.util.List;
 
 public class DataBaseHandler {
     private static final StandardLogger LOGGER = new StandardLogger("Database Handler");
-    private static final String dbUrl = "jdbc:sqlite:./database/database.db";
+    private static final String path = "./database/database.db";
+    private static final String dbUrl = "jdbc:sqlite:" + path;
 
     public static final DataBaseHandler INSTANCE = new DataBaseHandler();
 
@@ -19,6 +21,8 @@ public class DataBaseHandler {
 
     private DataBaseHandler()
     {
+        File file = new File(path);
+        if (file.getParentFile() != null) file.getParentFile().mkdirs();
         LOGGER.log("Initializing database...");
         createNewDatabase();
         Table.Builder tableBuilder = new Table.Builder("metaData");
