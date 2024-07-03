@@ -18,6 +18,7 @@ import net.dv8tion.jda.api.entities.Role;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.entities.channel.Channel;
 import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
+import net.dv8tion.jda.api.entities.channel.unions.GuildMessageChannelUnion;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.dv8tion.jda.api.interactions.commands.DefaultMemberPermissions;
@@ -31,6 +32,8 @@ import java.util.Collections;
 import java.util.Random;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
+
+import static net.dv8tion.jda.api.Permission.MESSAGE_MENTION_EVERYONE;
 
 public class CommandHandler extends ListenerAdapter {
     private static final StandardLogger LOGGER = new StandardLogger("CommandHandler");
@@ -177,8 +180,13 @@ public class CommandHandler extends ListenerAdapter {
             target = mapping.getAsUser();
             targetID = target.getIdLong();
         } else if (mentionable instanceof Role) {
-            target = mapping.getAsRole();
-            targetID = target.getIdLong();
+            if(memberHasPermissionToMentionRoleHere(event.getUser(), event.getGuildChannel(), mapping.getAsRole())) {
+                target = mapping.getAsRole();
+                targetID = target.getIdLong();
+            } else {
+                event.reply("You lack the required permissions to mention that role.").setEphemeral(true).queue();
+                return;
+            }
         } else {
             target = Main.JDA.retrieveUserById(targetID).complete();
         }
@@ -204,7 +212,14 @@ public class CommandHandler extends ListenerAdapter {
         }  else if (targetID == 1124053065109098708L) { // bot's own ID
             msg = "At the end of times, the %s has pet itself <a:pat_pat_pat:1211592019680694272>";
         }
-        event.reply(String.format(msg, targetID)).queue();
+        event.reply(String.format(msg, target)).queue();
+    }
+
+    private boolean memberHasPermissionToMentionRoleHere(User user, GuildMessageChannelUnion guildChannel, Role role) {
+        Member member = Utils.userToMember(user);
+        if(member == null) return false;
+        if(!role.isMentionable() && !member.hasPermission(guildChannel, MESSAGE_MENTION_EVERYONE)) return false;
+        return true;
     }
 
     private String petMasterPetMessage(IMentionable target) {
