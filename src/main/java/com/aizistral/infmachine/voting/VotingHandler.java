@@ -172,10 +172,10 @@ public class VotingHandler extends ListenerAdapter {
     }
 
     public boolean createVoting(String type, User votingTarget, boolean isForced) {
+        if(isTheArchitect(votingTarget)) return false;
         Member member = Utils.userToMember(votingTarget);
-        if( member == null || isTheArchitect(votingTarget)) return false;
-        if(isCursed(member)){
-            addBelieverVoteCount(member.getIdLong(), 1);
+        if(member == null || isCursed(member)){
+            addBelieverVoteCount(votingTarget.getIdLong(), 1);
             return false;
         }
         String votingInformation;
