@@ -28,7 +28,7 @@ public class DataBaseHandler {
         Table.Builder tableBuilder = new Table.Builder("metaData");
         tableBuilder.addField("id", FieldType.LONG, true, true);
         tableBuilder.addField("infiniteVersion", FieldType.STRING, false, true);
-        tableBuilder.addField("indexed", FieldType.BOOLEAN, false, false);
+        tableBuilder.addField("isIndexed", FieldType.BOOLEAN, false, false);
         Table table = tableBuilder.build();
         createNewTable(table);
         LOGGER.log("Database initialization complete.");
