@@ -1,6 +1,5 @@
 package com.aizistral.infmachine.leaderboard;
 
-import com.aizistral.infmachine.InfiniteMachine;
 import com.aizistral.infmachine.config.InfiniteConfig;
 import com.aizistral.infmachine.database.DataBaseHandler;
 import com.aizistral.infmachine.indexation.CoreMessageIndexer;
@@ -9,10 +8,7 @@ import lombok.val;
 
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
-import net.dv8tion.jda.api.requests.restaction.WebhookMessageCreateAction;
-import org.jetbrains.annotations.NotNull;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -21,7 +17,7 @@ public class LeaderBoard {
     public static final LeaderBoard INSTANCE = new LeaderBoard();
 
     private LeaderBoard() {
-
+        LOGGER.debug("Constructor called");
     }
 
     public String getLeaderboardString(SlashCommandInteractionEvent event, boolean isAdmin)
@@ -30,7 +26,7 @@ public class LeaderBoard {
         int start = option != null ? Math.max(option.getAsInt(), 1) : 1;
         StringBuilder stringBuilder = new StringBuilder();
         String headerString = String.format("## %s", start == 1 ? "Top 10 Most Active Human-Like Entities:": String.format("Most Active Human-Like Entities (Positions %d - %d):", start, start + 9));
-        stringBuilder.append(headerString + "\n");
+        stringBuilder.append(headerString).append("\n");
         List<Map<String, Object>> leaderBoard = getLeaderboard(start, isAdmin);
         int i = start;
         for (Map<String, Object> entry : leaderBoard) {
@@ -61,7 +57,14 @@ public class LeaderBoard {
         StringBuilder stringBuilder = new StringBuilder();
         stringBuilder.append(userID == event.getUser().getIdLong() ? "## Your Rating Stats:" : String.format("## <@%d>'s Rating Stats:", userID));
         stringBuilder.append("\n");
-        Map<String, Object> entry = getRating(userID).get(0);
+        Map<String, Object> entry;
+        try {
+            entry = getRating(userID).get(0);
+        } catch (IndexOutOfBoundsException e) {
+            // The user has no entry in the database yet
+            //Might happen during reindex when a member is requesting information about a user who has not been indexed
+            return "This User has not been indexed yet. If the indexer is still running, try again later";
+        }
         stringBuilder.append(String.format("Leaderboard position: **#%s**\n", entry.get("position").toString()));
         long rating = getDispayRating(Long.parseLong(entry.get("totalRating").toString()));
         stringBuilder.append(String.format("Total rating acquired: **%d points**\n", rating));
